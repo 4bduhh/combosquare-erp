@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --violet: #4B2A87;
+  --mauve: #7653B8;
+  --peach: #D9C8FF;
+  --ivory: #FFFFFF;
+}
+
+* {
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background: #F8F7FC;
+  color: #1F1B2E;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #F0EEF8; }
+::-webkit-scrollbar-thumb { background: #C4B5FD; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #9B7BDE; }
+
+/* Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(118,83,184,0.15); }
+  50% { box-shadow: 0 0 30px rgba(118,83,184,0.3); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+.animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+.animate-scale-in { animation: scaleIn 0.3s ease-out forwards; }
+.animate-slide-in-left { animation: slideInLeft 0.4s ease-out forwards; }
+.animate-glow { animation: glow 3s ease-in-out infinite; }
+.animate-float { animation: float 4s ease-in-out infinite; }
+
+/* Gradient backgrounds */
+.bg-violet-dusk {
+  background: linear-gradient(135deg, #4B2A87 0%, #5D3AA0 50%, #4B2A87 100%);
+}
+.bg-card-gradient {
+  background: linear-gradient(145deg, rgba(118,83,184,0.08) 0%, rgba(75,42,135,0.03) 100%);
+}
+.bg-peach-gradient {
+  background: linear-gradient(135deg, #7653B8 0%, #4B2A87 100%);
+}
+.text-gradient-peach {
+  background: linear-gradient(135deg, #7653B8 0%, #4B2A87 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass card — light theme */
+.glass-card {
+  background: #FFFFFF;
+  backdrop-filter: blur(12px);
+  border: 1px solid #E8E5F0;
+  box-shadow: 0 1px 3px rgba(75,42,135,0.06);
+}
+.glass-card-hover {
+  transition: all 0.3s ease;
+}
+.glass-card-hover:hover {
+  border-color: #C4B5FD;
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(75,42,135,0.12);
+}
+
+/* Button glow */
+.btn-glow {
+  transition: all 0.3s ease;
+}
+.btn-glow:hover {
+  box-shadow: 0 4px 20px rgba(118,83,184,0.35);
+  transform: translateY(-2px);
+}
+
+/* Stagger delays */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+
+/* Progress bar */
+.progress-fill {
+  transition: width 1s ease-out;
+}
