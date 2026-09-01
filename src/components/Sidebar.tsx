@@ -3,6 +3,7 @@ import { useAuth } from '@/context/AuthContext';
 import {
   LayoutDashboard,
   Users,
+  CalendarCheck,
   DollarSign,
   Receipt,
   FolderKanban,
@@ -14,7 +15,7 @@ import {
 } from 'lucide-react';
 import logoUrl from '/Combo_Square_Logo.png';
 
-export type PageKey = 'dashboard' | 'employees' | 'revenue' | 'expenses' | 'projects' | 'targets' | 'settings';
+export type PageKey = 'dashboard' | 'employees' | 'attendance' | 'revenue' | 'expenses' | 'projects' | 'targets' | 'settings';
 
 interface SidebarProps {
   current: PageKey;
@@ -24,6 +25,7 @@ interface SidebarProps {
 const NAV_ITEMS: { key: PageKey; label: string; icon: typeof LayoutDashboard }[] = [
   { key: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { key: 'employees', label: 'Employees', icon: Users },
+  { key: 'attendance', label: 'Attendance', icon: CalendarCheck },
   { key: 'revenue', label: 'Revenue', icon: DollarSign },
   { key: 'expenses', label: 'Expenses & Profit', icon: Receipt },
   { key: 'projects', label: 'Projects', icon: FolderKanban },

@@ -11,6 +11,7 @@ export type ServiceType =
 export type PaymentStatus = 'paid' | 'pending';
 export type ProjectStatus = 'todo' | 'in_progress' | 'completed';
 export type CommissionType = 'percentage' | 'fixed';
+export type AttendanceStatus = 'present' | 'absent' | 'half_day' | 'leave';
 
 export interface Employee {
   id: string;
@@ -25,6 +26,16 @@ export interface Employee {
   commission_type: CommissionType;
   commission_value: number;
   monthly_target: number;
+  created_at: string;
+}
+
+export interface AttendanceEntry {
+  id: string;
+  user_id: string;
+  employee_id: string;
+  date: string;
+  status: AttendanceStatus;
+  notes: string | null;
   created_at: string;
 }
 

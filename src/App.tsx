@@ -4,6 +4,7 @@ import { AuthPage } from '@/pages/AuthPage';
 import { Sidebar, type PageKey } from '@/components/Sidebar';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { EmployeesPage } from '@/pages/EmployeesPage';
+import { AttendancePage } from '@/pages/AttendancePage';
 import { RevenuePage } from '@/pages/RevenuePage';
 import { ExpensesPage } from '@/pages/ExpensesPage';
 import { ProjectsPage } from '@/pages/ProjectsPage';
@@ -30,6 +31,7 @@ function App() {
     switch (page) {
       case 'dashboard': return <DashboardPage />;
       case 'employees': return <EmployeesPage />;
+      case 'attendance': return <AttendancePage />;
       case 'revenue': return <RevenuePage />;
       case 'expenses': return <ExpensesPage />;
       case 'projects': return <ProjectsPage />;
