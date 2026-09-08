@@ -17,6 +17,11 @@ function toISODate(d: Date) {
   return d.toISOString().slice(0, 10);
 }
 
+function formatDDMMYYYY(iso: string) {
+  const [y, m, d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
 export function AttendancePage() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [attendance, setAttendance] = useState<AttendanceEntry[]>([]);
@@ -39,12 +44,33 @@ export function AttendancePage() {
   const markStatus = async (employeeId: string, status: AttendanceStatus) => {
     setSaving(employeeId);
     const existing = attendance.find((a) => a.employee_id === employeeId && a.date === selectedDate);
+
     if (existing) {
-      await supabase.from('attendance').update({ status }).eq('id', existing.id);
+      // Update the count cards and button instantly, then save in the background.
+      setAttendance((prev) => prev.map((a) => (a.id === existing.id ? { ...a, status } : a)));
+      const { error } = await supabase.from('attendance').update({ status }).eq('id', existing.id);
+      if (error) {
+        // Revert on failure
+        setAttendance((prev) => prev.map((a) => (a.id === existing.id ? { ...a, status: existing.status } : a)));
+      }
     } else {
-      await supabase.from('attendance').insert({ employee_id: employeeId, date: selectedDate, status });
+      // Optimistically add a temporary row so the UI updates instantly.
+      const tempId = `temp-${employeeId}-${selectedDate}`;
+      const optimisticEntry = { id: tempId, employee_id: employeeId, date: selectedDate, status } as AttendanceEntry;
+      setAttendance((prev) => [...prev, optimisticEntry]);
+
+      const { data, error } = await supabase
+        .from('attendance')
+        .insert({ employee_id: employeeId, date: selectedDate, status })
+        .select()
+        .single();
+
+      if (error) {
+        setAttendance((prev) => prev.filter((a) => a.id !== tempId));
+      } else if (data) {
+        setAttendance((prev) => prev.map((a) => (a.id === tempId ? data : a)));
+      }
     }
-    await load();
     setSaving(null);
   };
 
@@ -103,12 +129,17 @@ export function AttendancePage() {
             <button onClick={() => changeDay(-1)} className="p-1.5 rounded-lg hover:bg-[#F0EEF8] text-[#6B6580]">
               <ChevronLeft size={18} />
             </button>
-            <input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="text-sm font-semibold text-[#1F1B2E] outline-none bg-transparent cursor-pointer"
-            />
+            <div className="relative flex items-center">
+              <span className="text-sm font-semibold text-[#1F1B2E] pointer-events-none select-none whitespace-nowrap">
+                {formatDDMMYYYY(selectedDate)}
+              </span>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+            </div>
             <button onClick={() => changeDay(1)} className="p-1.5 rounded-lg hover:bg-[#F0EEF8] text-[#6B6580]">
               <ChevronRight size={18} />
             </button>
