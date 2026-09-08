@@ -8,7 +8,9 @@ import { EmptyState } from '@/components/EmptyState';
 import { Field, TextInput, Select, Button, TextArea } from '@/components/Form';
 import { BarChart } from '@/components/Charts';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
+import { DateInput } from '@/components/DateInput';
 import { formatINR } from '@/lib/currency';
+import { formatDate } from '@/lib/date';
 import { Receipt, Plus, Pencil, Trash2, TrendingUp, TrendingDown, Wallet, DollarSign } from 'lucide-react';
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -234,7 +236,7 @@ export function ExpensesPage() {
                       </td>
                       <td className="py-3 text-sm text-[#6B6580]">{entry.description ?? '—'}</td>
                       <td className="py-3 text-sm font-bold text-[#1F1B2E]">{formatINR(Number(entry.amount))}</td>
-                      <td className="py-3 text-sm text-[#6B6580]">{new Date(entry.date).toLocaleDateString()}</td>
+                      <td className="py-3 text-sm text-[#6B6580]">{formatDate(entry.date)}</td>
                       <td className="py-3">
                         <div className="flex gap-1 justify-end">
                           <button onClick={() => openEdit(entry)} className="p-2 rounded-lg text-[#9B95A8] hover:text-[#7653B8] hover:bg-[#F0EEF8] transition-all"><Pencil size={16} /></button>
@@ -260,7 +262,7 @@ export function ExpensesPage() {
           <Field label="Description (optional)"><TextArea rows={2} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Monthly office rent..." /></Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Amount (₹)"><TextInput type="number" min="0" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required /></Field>
-            <Field label="Date"><TextInput type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required /></Field>
+            <Field label="Date"><DateInput value={form.date} onChange={(v) => setForm({ ...form, date: v })} required /></Field>
           </div>
           <div className="flex gap-3 pt-2">
             <Button type="submit" className="flex-1">{editing ? 'Save Changes' : 'Add Expense'}</Button>

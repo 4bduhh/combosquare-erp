@@ -185,4 +185,5 @@ CREATE POLICY "insert_own_company_settings" ON company_settings FOR INSERT TO au
 DROP POLICY IF EXISTS "update_own_company_settings" ON company_settings;
 CREATE POLICY "update_own_company_settings" ON company_settings FOR UPDATE TO authenticated USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 DROP POLICY IF EXISTS "delete_own_company_settings" ON company_settings;
-CREATE POLICY "delete_own_company_settings" ON company_settings FOR DELETE TO authenticated USING (auth.uid() = user_id);
+CREATE POLICY "delete_own_company_settings" ON company_settings FOR DELETE TO authenticated USING (auth.uid() = user_id);                                                              
+UPDATE storage.buckets SET public = true WHERE id = 'employee-photos';

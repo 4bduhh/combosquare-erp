@@ -8,7 +8,9 @@ import { EmptyState } from '@/components/EmptyState';
 import { Field, TextInput, Select, Button } from '@/components/Form';
 import { DonutChart, BarChart } from '@/components/Charts';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
+import { DateInput } from '@/components/DateInput';
 import { formatINR } from '@/lib/currency';
+import { formatDate } from '@/lib/date';
 import { DollarSign, Plus, Pencil, Trash2, TrendingUp, Calendar } from 'lucide-react';
 
 const SERVICE_COLORS: Record<ServiceType, string> = {
@@ -190,7 +192,7 @@ export function RevenuePage() {
                       <td className="py-3 text-sm text-[#6B6580]">{entry.project_name}</td>
                       <td className="py-3 text-sm text-[#7653B8]">{SERVICE_LABELS[entry.service_type]}</td>
                       <td className="py-3 text-sm font-bold text-[#1F1B2E]">{formatINR(Number(entry.amount))}</td>
-                      <td className="py-3 text-sm text-[#6B6580]">{new Date(entry.date).toLocaleDateString()}</td>
+                      <td className="py-3 text-sm text-[#6B6580]">{formatDate(entry.date)}</td>
                       <td className="py-3">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${entry.payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
                           {entry.payment_status === 'paid' ? 'Paid' : 'Pending'}
@@ -232,7 +234,7 @@ export function RevenuePage() {
           </div>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Amount (₹)"><TextInput type="number" min="0" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required /></Field>
-            <Field label="Date"><TextInput type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required /></Field>
+            <Field label="Date"><DateInput value={form.date} onChange={(v) => setForm({ ...form, date: v })} required /></Field>
           </div>
           <div className="flex gap-3 pt-2">
             <Button type="submit" className="flex-1">{editing ? 'Save Changes' : 'Add Revenue'}</Button>

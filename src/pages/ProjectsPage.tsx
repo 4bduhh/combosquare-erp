@@ -7,7 +7,9 @@ import { Modal } from '@/components/Modal';
 import { EmptyState } from '@/components/EmptyState';
 import { Field, TextInput, Select, Button } from '@/components/Form';
 import { FolderKanban, Plus, Pencil, Trash2, Calendar, DollarSign, User, LayoutGrid, List } from 'lucide-react';
+import { DateInput } from '@/components/DateInput';
 import { formatINR } from '@/lib/currency';
+import { formatDate } from '@/lib/date';
 
 const STATUS_CONFIG: Record<ProjectStatus, { label: string; color: string; bg: string }> = {
   todo: { label: 'To-Do', color: '#6B6580', bg: '#F0EEF8' },
@@ -152,7 +154,7 @@ export function ProjectsPage() {
                       <p className="text-xs text-[#7653B8] mb-3">{SERVICE_LABELS[proj.service_type]}</p>
                       <div className="space-y-1.5 text-xs text-[#6B6580]">
                         <div className="flex items-center gap-1.5"><User size={12} /> {proj.client_name}</div>
-                        {proj.deadline && <div className="flex items-center gap-1.5"><Calendar size={12} /> Due {new Date(proj.deadline).toLocaleDateString()}</div>}
+                        {proj.deadline && <div className="flex items-center gap-1.5"><Calendar size={12} /> Due {formatDate(proj.deadline)}</div>}
                         <div className="flex items-center gap-1.5"><DollarSign size={12} /> {formatINR(Number(proj.amount))}</div>
                       </div>
                       {proj.assigned_employee_ids.length > 0 && (
@@ -209,7 +211,7 @@ export function ProjectsPage() {
                       <td className="py-3 text-sm text-[#6B6580]">{proj.client_name}</td>
                       <td className="py-3 text-sm text-[#7653B8]">{SERVICE_LABELS[proj.service_type]}</td>
                       <td className="py-3 text-sm font-bold text-[#1F1B2E]">{formatINR(Number(proj.amount))}</td>
-                      <td className="py-3 text-sm text-[#6B6580]">{proj.deadline ? new Date(proj.deadline).toLocaleDateString() : '—'}</td>
+                      <td className="py-3 text-sm text-[#6B6580]">{proj.deadline ? formatDate(proj.deadline) : '—'}</td>
                       <td className="py-3">
                         <span className="px-2.5 py-1 rounded-full text-xs font-semibold" style={{ background: cfg.bg, color: cfg.color }}>{cfg.label}</span>
                       </td>
@@ -267,8 +269,8 @@ export function ProjectsPage() {
             </div>
           </Field>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Start Date"><TextInput type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} /></Field>
-            <Field label="Deadline"><TextInput type="date" value={form.deadline} onChange={(e) => setForm({ ...form, deadline: e.target.value })} /></Field>
+            <Field label="Start Date"><DateInput value={form.start_date} onChange={(v) => setForm({ ...form, start_date: v })} /></Field>
+            <Field label="Deadline"><DateInput value={form.deadline} onChange={(v) => setForm({ ...form, deadline: v })} /></Field>
           </div>
           <Field label="Project Value (₹)"><TextInput type="number" min="0" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required /></Field>
           <div className="flex gap-3 pt-2">

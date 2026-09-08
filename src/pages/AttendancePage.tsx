@@ -5,6 +5,7 @@ import { PageHeader, PageContainer } from '@/components/Sidebar';
 import { EmptyState } from '@/components/EmptyState';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { CalendarCheck, CalendarX, CalendarClock, Users, ChevronLeft, ChevronRight, Check, X, Clock, Plane } from 'lucide-react';
+import { formatDate } from '@/lib/date';
 
 const STATUS_CONFIG: Record<AttendanceStatus, { label: string; color: string; bg: string; icon: typeof Check }> = {
   present: { label: 'Present', color: '#22c55e', bg: 'bg-green-100 text-green-700', icon: Check },
@@ -15,11 +16,6 @@ const STATUS_CONFIG: Record<AttendanceStatus, { label: string; color: string; bg
 
 function toISODate(d: Date) {
   return d.toISOString().slice(0, 10);
-}
-
-function formatDDMMYYYY(iso: string) {
-  const [y, m, d] = iso.split('-');
-  return `${d}/${m}/${y}`;
 }
 
 export function AttendancePage() {
@@ -131,7 +127,7 @@ export function AttendancePage() {
             </button>
             <div className="relative flex items-center">
               <span className="text-sm font-semibold text-[#1F1B2E] pointer-events-none select-none whitespace-nowrap">
-                {formatDDMMYYYY(selectedDate)}
+                {formatDate(selectedDate)}
               </span>
               <input
                 type="date"

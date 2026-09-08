@@ -7,7 +7,9 @@ import { EmptyState } from '@/components/EmptyState';
 import { Field, TextInput, Select, Button } from '@/components/Form';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { PhotoDropzone } from '@/components/PhotoDropzone';
+import { DateInput } from '@/components/DateInput';
 import { formatINR } from '@/lib/currency';
+import { formatDate } from '@/lib/date';
 import { Users, Plus, Pencil, Trash2, Mail, Phone, Calendar, Search, Briefcase, Award, Target as TargetIcon } from 'lucide-react';
 
 const ROLES = [
@@ -150,7 +152,7 @@ export function EmployeesPage() {
                 <div className="space-y-2 text-sm">
                   {emp.email && <div className="flex items-center gap-2 text-[#6B6580]"><Mail size={14} className="shrink-0" /><span className="truncate">{emp.email}</span></div>}
                   {emp.phone && <div className="flex items-center gap-2 text-[#6B6580]"><Phone size={14} className="shrink-0" /><span>{emp.phone}</span></div>}
-                  {emp.joining_date && <div className="flex items-center gap-2 text-[#6B6580]"><Calendar size={14} className="shrink-0" /><span>{new Date(emp.joining_date).toLocaleDateString()}</span></div>}
+                  {emp.joining_date && <div className="flex items-center gap-2 text-[#6B6580]"><Calendar size={14} className="shrink-0" /><span>{formatDate(emp.joining_date)}</span></div>}
                 </div>
 
                 <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-[#E8E5F0]">
@@ -182,7 +184,7 @@ export function EmployeesPage() {
                 {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
               </Select>
             </Field>
-            <Field label="Joining Date"><TextInput type="date" value={form.joining_date} onChange={(e) => setForm({ ...form, joining_date: e.target.value })} /></Field>
+            <Field label="Joining Date"><DateInput value={form.joining_date} onChange={(v) => setForm({ ...form, joining_date: v })} /></Field>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Email"><TextInput type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="john@combosquare.com" /></Field>

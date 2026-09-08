@@ -4,6 +4,7 @@ import type { Employee, RevenueEntry, ExpenseEntry, ProjectEntry, TargetEntry } 
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { BarChart, ProgressRing } from '@/components/Charts';
 import { formatINR } from '@/lib/currency';
+import { formatDateTime } from '@/lib/date';
 import { PageHeader, PageContainer } from '@/components/Sidebar';
 import {
   DollarSign, TrendingUp, Users, FolderKanban, CheckCircle2,
@@ -96,7 +97,7 @@ export function DashboardPage() {
       items.push({
         icon: DollarSign,
         text: `Revenue: ${r.client_name} — ${r.project_name}`,
-        time: new Date(r.created_at).toLocaleDateString(),
+        time: formatDateTime(r.created_at),
         color: 'text-[#7653B8]',
       });
     });
@@ -104,7 +105,7 @@ export function DashboardPage() {
       items.push({
         icon: FolderKanban,
         text: `Project: ${p.project_name} for ${p.client_name}`,
-        time: new Date(p.created_at).toLocaleDateString(),
+        time: formatDateTime(p.created_at),
         color: 'text-[#9B7BDE]',
       });
     });
