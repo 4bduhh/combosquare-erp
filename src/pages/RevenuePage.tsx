@@ -32,10 +32,12 @@ export function RevenuePage() {
   const [form, setForm] = useState({
     client_name: '', project_name: '', service_type: 'branding' as ServiceType,
     amount: '0', date: new Date().toISOString().slice(0, 10), payment_status: 'paid' as PaymentStatus,
+    advance_amount: '0',
   });
 
   const load = async () => {
-    const { data } = await supabase.from('revenue').select('*').order('date', { ascending: false });
+    const { data, error } = await supabase.from('revenue').select('*').order('date', { ascending: false });
+    if (error) console.error('Revenue fetch error:', error);
     setEntries(data ?? []);
     setLoading(false);
   };
@@ -44,7 +46,7 @@ export function RevenuePage() {
 
   const openAdd = () => {
     setEditing(null);
-    setForm({ client_name: '', project_name: '', service_type: 'branding', amount: '0', date: new Date().toISOString().slice(0, 10), payment_status: 'paid' });
+    setForm({ client_name: '', project_name: '', service_type: 'branding', amount: '0', date: new Date().toISOString().slice(0, 10), payment_status: 'paid', advance_amount: '0' });
     setModalOpen(true);
   };
 
@@ -53,6 +55,7 @@ export function RevenuePage() {
     setForm({
       client_name: entry.client_name, project_name: entry.project_name, service_type: entry.service_type,
       amount: String(entry.amount), date: entry.date, payment_status: entry.payment_status,
+      advance_amount: String(entry.advance_amount ?? 0),
     });
     setModalOpen(true);
   };
@@ -62,6 +65,7 @@ export function RevenuePage() {
     const payload = {
       client_name: form.client_name, project_name: form.project_name, service_type: form.service_type,
       amount: Number(form.amount), date: form.date, payment_status: form.payment_status,
+      advance_amount: form.payment_status === 'advance' ? Number(form.advance_amount) : 0,
     };
     if (editing) {
       await supabase.from('revenue').update(payload).eq('id', editing.id);
@@ -80,11 +84,19 @@ export function RevenuePage() {
 
   const stats = useMemo(() => {
     const totalPaid = entries.filter((e) => e.payment_status === 'paid').reduce((s, e) => s + Number(e.amount), 0);
+    const totalAdvanceReceived = entries.filter((e) => e.payment_status === 'advance').reduce((s, e) => s + Number(e.advance_amount ?? 0), 0);
+    const totalAdvanceBalance = entries.filter((e) => e.payment_status === 'advance').reduce((s, e) => s + (Number(e.amount) - Number(e.advance_amount ?? 0)), 0);
     const totalPending = entries.filter((e) => e.payment_status === 'pending').reduce((s, e) => s + Number(e.amount), 0);
     const now = new Date();
     const monthlyPaid = entries.filter((e) => e.payment_status === 'paid' && new Date(e.date).getMonth() === now.getMonth() && new Date(e.date).getFullYear() === now.getFullYear()).reduce((s, e) => s + Number(e.amount), 0);
-    return { totalPaid, totalPending, monthlyPaid, count: entries.length };
+    return { totalPaid, totalAdvanceReceived, totalAdvanceBalance, totalPending, monthlyPaid, count: entries.length };
   }, [entries]);
+
+  const byPaymentStatus = useMemo(() => ({
+    fullyPaid: entries.filter((e) => e.payment_status === 'paid'),
+    advancePaid: entries.filter((e) => e.payment_status === 'advance'),
+    notPaid: entries.filter((e) => e.payment_status === 'pending'),
+  }), [entries]);
 
   const byService = useMemo(() => {
     const map = new Map<ServiceType, number>();
@@ -138,7 +150,7 @@ export function RevenuePage() {
       ) : (
         <>
           {/* Stat cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <div className="glass-card glass-card-hover rounded-2xl p-5 animate-fade-in-up">
               <div className="flex items-center gap-3 mb-2"><div className="p-2 rounded-xl bg-[#7653B8]/10"><DollarSign className="text-[#7653B8]" size={18} /></div><span className="text-sm text-[#6B6580]">Total Paid</span></div>
               <p className="text-2xl font-extrabold text-[#1F1B2E]"><AnimatedCounter value={stats.totalPaid} prefix="₹" /></p>
@@ -148,12 +160,87 @@ export function RevenuePage() {
               <p className="text-2xl font-extrabold text-[#1F1B2E]"><AnimatedCounter value={stats.monthlyPaid} prefix="₹" /></p>
             </div>
             <div className="glass-card glass-card-hover rounded-2xl p-5 animate-fade-in-up stagger-3">
-              <div className="flex items-center gap-3 mb-2"><div className="p-2 rounded-xl bg-orange-100"><Calendar className="text-orange-500" size={18} /></div><span className="text-sm text-[#6B6580]">Pending</span></div>
+              <div className="flex items-center gap-3 mb-2"><div className="p-2 rounded-xl bg-blue-100"><DollarSign className="text-blue-500" size={18} /></div><span className="text-sm text-[#6B6580]">Advance Received</span></div>
+              <p className="text-2xl font-extrabold text-[#1F1B2E]"><AnimatedCounter value={stats.totalAdvanceReceived} prefix="₹" /></p>
+              {stats.totalAdvanceBalance > 0 && <p className="text-xs text-[#9B95A8] mt-1">₹{stats.totalAdvanceBalance.toLocaleString('en-IN')} balance due</p>}
+            </div>
+            <div className="glass-card glass-card-hover rounded-2xl p-5 animate-fade-in-up stagger-4">
+              <div className="flex items-center gap-3 mb-2"><div className="p-2 rounded-xl bg-orange-100"><Calendar className="text-orange-500" size={18} /></div><span className="text-sm text-[#6B6580]">Not Paid</span></div>
               <p className="text-2xl font-extrabold text-[#1F1B2E]"><AnimatedCounter value={stats.totalPending} prefix="₹" /></p>
             </div>
             <div className="glass-card glass-card-hover rounded-2xl p-5 animate-fade-in-up stagger-4">
               <div className="flex items-center gap-3 mb-2"><div className="p-2 rounded-xl bg-[#7653B8]/10"><DollarSign className="text-[#7653B8]" size={18} /></div><span className="text-sm text-[#6B6580]">Total Entries</span></div>
               <p className="text-2xl font-extrabold text-[#1F1B2E]"><AnimatedCounter value={stats.count} /></p>
+            </div>
+          </div>
+
+          {/* Payment status breakdown: who's fully paid, who paid advance only, who hasn't paid */}
+          <div className="grid lg:grid-cols-3 gap-6 mb-6">
+            <div className="glass-card rounded-2xl p-6 animate-fade-in-up">
+              <h3 className="text-lg font-bold text-[#1F1B2E] mb-1">Fully Paid</h3>
+              <p className="text-xs text-[#9B95A8] mb-4">{byPaymentStatus.fullyPaid.length} client{byPaymentStatus.fullyPaid.length === 1 ? '' : 's'}</p>
+              {byPaymentStatus.fullyPaid.length === 0 ? (
+                <p className="text-[#9B95A8] text-sm py-4 text-center">No fully paid entries yet</p>
+              ) : (
+                <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+                  {byPaymentStatus.fullyPaid.map((entry) => (
+                    <div key={entry.id} className="flex items-center justify-between border-b border-[#F0EEF8] pb-2 last:border-0">
+                      <div>
+                        <p className="text-sm font-semibold text-[#1F1B2E]">{entry.client_name}</p>
+                        <p className="text-xs text-[#9B95A8]">{entry.project_name}</p>
+                      </div>
+                      <span className="text-sm font-bold text-green-600">{formatINR(Number(entry.amount))}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="glass-card rounded-2xl p-6 animate-fade-in-up stagger-2">
+              <h3 className="text-lg font-bold text-[#1F1B2E] mb-1">Advance Paid</h3>
+              <p className="text-xs text-[#9B95A8] mb-4">{byPaymentStatus.advancePaid.length} client{byPaymentStatus.advancePaid.length === 1 ? '' : 's'}</p>
+              {byPaymentStatus.advancePaid.length === 0 ? (
+                <p className="text-[#9B95A8] text-sm py-4 text-center">No advance-only entries yet</p>
+              ) : (
+                <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+                  {byPaymentStatus.advancePaid.map((entry) => {
+                    const advance = Number(entry.advance_amount ?? 0);
+                    const balance = Number(entry.amount) - advance;
+                    return (
+                      <div key={entry.id} className="border-b border-[#F0EEF8] pb-2 last:border-0">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-sm font-semibold text-[#1F1B2E]">{entry.client_name}</p>
+                            <p className="text-xs text-[#9B95A8]">{entry.project_name}</p>
+                          </div>
+                          <span className="text-sm font-bold text-blue-600">{formatINR(advance)}</span>
+                        </div>
+                        <p className="text-xs text-[#9B95A8] mt-0.5">₹{balance.toLocaleString('en-IN')} balance due of {formatINR(Number(entry.amount))}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="glass-card rounded-2xl p-6 animate-fade-in-up stagger-3">
+              <h3 className="text-lg font-bold text-[#1F1B2E] mb-1">Not Paid</h3>
+              <p className="text-xs text-[#9B95A8] mb-4">{byPaymentStatus.notPaid.length} client{byPaymentStatus.notPaid.length === 1 ? '' : 's'}</p>
+              {byPaymentStatus.notPaid.length === 0 ? (
+                <p className="text-[#9B95A8] text-sm py-4 text-center">No pending entries</p>
+              ) : (
+                <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
+                  {byPaymentStatus.notPaid.map((entry) => (
+                    <div key={entry.id} className="flex items-center justify-between border-b border-[#F0EEF8] pb-2 last:border-0">
+                      <div>
+                        <p className="text-sm font-semibold text-[#1F1B2E]">{entry.client_name}</p>
+                        <p className="text-xs text-[#9B95A8]">{entry.project_name}</p>
+                      </div>
+                      <span className="text-sm font-bold text-orange-600">{formatINR(Number(entry.amount))}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -194,9 +281,16 @@ export function RevenuePage() {
                       <td className="py-3 text-sm font-bold text-[#1F1B2E]">{formatINR(Number(entry.amount))}</td>
                       <td className="py-3 text-sm text-[#6B6580]">{formatDate(entry.date)}</td>
                       <td className="py-3">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${entry.payment_status === 'paid' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>
-                          {entry.payment_status === 'paid' ? 'Paid' : 'Pending'}
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                          entry.payment_status === 'paid' ? 'bg-green-100 text-green-700'
+                          : entry.payment_status === 'advance' ? 'bg-blue-100 text-blue-700'
+                          : 'bg-amber-100 text-amber-700'
+                        }`}>
+                          {entry.payment_status === 'paid' ? 'Paid' : entry.payment_status === 'advance' ? 'Advance' : 'Pending'}
                         </span>
+                        {entry.payment_status === 'advance' && (
+                          <p className="text-[11px] text-[#9B95A8] mt-1">{formatINR(Number(entry.advance_amount ?? 0))} received</p>
+                        )}
                       </td>
                       <td className="py-3">
                         <div className="flex gap-1 justify-end">
@@ -227,8 +321,9 @@ export function RevenuePage() {
             </Field>
             <Field label="Payment Status">
               <Select value={form.payment_status} onChange={(e) => setForm({ ...form, payment_status: e.target.value as PaymentStatus })}>
-                <option value="paid">Paid</option>
-                <option value="pending">Pending</option>
+                <option value="paid">Paid (Full)</option>
+                <option value="advance">Advance Only</option>
+                <option value="pending">Not Paid</option>
               </Select>
             </Field>
           </div>
@@ -236,6 +331,18 @@ export function RevenuePage() {
             <Field label="Amount (₹)"><TextInput type="number" min="0" step="0.01" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} required /></Field>
             <Field label="Date"><DateInput value={form.date} onChange={(v) => setForm({ ...form, date: v })} required /></Field>
           </div>
+          {form.payment_status === 'advance' && (
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Advance Amount Received (₹)">
+                <TextInput type="number" min="0" step="0.01" value={form.advance_amount} onChange={(e) => setForm({ ...form, advance_amount: e.target.value })} required />
+              </Field>
+              <Field label="Balance Due">
+                <div className="px-3 py-2.5 rounded-xl bg-[#F8F7FC] text-sm text-[#6B6580] font-medium">
+                  ₹{Math.max(0, Number(form.amount) - Number(form.advance_amount)).toLocaleString('en-IN')}
+                </div>
+              </Field>
+            </div>
+          )}
           <div className="flex gap-3 pt-2">
             <Button type="submit" className="flex-1">{editing ? 'Save Changes' : 'Add Revenue'}</Button>
             <Button type="button" variant="ghost" onClick={() => setModalOpen(false)}>Cancel</Button>

@@ -8,7 +8,7 @@ export type ServiceType =
   | 'app_android'
   | 'video_editing';
 
-export type PaymentStatus = 'paid' | 'pending';
+export type PaymentStatus = 'paid' | 'advance' | 'pending';
 export type ProjectStatus = 'todo' | 'in_progress' | 'completed';
 export type CommissionType = 'percentage' | 'fixed';
 export type AttendanceStatus = 'present' | 'absent' | 'half_day' | 'leave';
@@ -48,6 +48,7 @@ export interface RevenueEntry {
   amount: number;
   date: string;
   payment_status: PaymentStatus;
+  advance_amount: number;
   created_at: string;
 }
 
